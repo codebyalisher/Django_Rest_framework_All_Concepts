@@ -1,58 +1,6 @@
 # Django_Rest_Framework
-| Approach                         | Description                                                                                   | When to Use                                                                 |
-|----------------------------------|-----------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------|
-| Dynamic Actions in a Single View | Handle multiple actions in one view using a parameter (e.g., action).                         | Small applications with simple forms and limited actions.                  |
-| Separate Views for Each Action   | Create separate views for each action (e.g., register, signin, logout).                       | Medium to large applications with complex logic for each action.           |
-| Hybrid Approach                  | Combine Django templates for server-side rendering with DRF APIs.                            | Monolithic applications with tightly coupled backend and frontend.         |
-| Advanced Renderer Usage          | Customize response formats using DRF renderers (e.g., JSON, HTML, plain text).               | When you need to support multiple response formats.                        |
-| Redirection and HTML Rendering   | Use redirect and TemplateHTMLRenderer to navigate and render HTML pages.                     | When you need to redirect users and render HTML templates.                 |
 
----
-
-**Decision Tree for Choosing an Approach**
-
-- **Is your frontend completely separate (e.g., React, Angular, Vue.js)?**
-  - Yes → Use API-Only (No Templates).
-  - No → Proceed to the next question.
-  
-- **Do you need server-rendered HTML pages?**
-  - Yes → Proceed to the next question.
-  - No → Use API-Only (No Templates).
-
-- **Do you need to handle multiple actions in one view?**
-  - Yes → Use Dynamic Actions in a Single View.
-  - No → Use Separate Views for Each Action.
-
-- **Do you need to support multiple response formats (e.g., JSON, HTML)?**
-  - Yes → Use Advanced Renderer Usage.
-  - No → Use Hybrid Approach.
-
-- **Do you need to redirect users and render HTML templates?**
-  - Yes → Use Redirection and HTML Rendering.
-  - No → Use Hybrid Approach.
-
----
-
-**Deserialization**  
-We use deserialization when performing create, update, and delete actions.  
-For this flow:
-1. Extract data from the request body.
-2. As it is in stream (in bytes), parse it into Python data through a JSON parser.
-3. Pass this Python data to the serializer.
-4. After validation, save it and display a success message ("Data created successfully").  
-
-The serializer works for both serialization (getting the model instance, passing it to the serializer, converting it to JSON through the JSON renderer, and sending it to the frontend, mostly for data reading) and deserialization (create, update, delete actions).
-
----
-
-**Field Level Validation**
-
-```python
-def validate_fieldname(self):
-    # Condition
-```
-
-# Django Rest Framework (DRF) Implementation Approaches
+## Django Rest Framework (DRF) Implementation Approaches
 
 DRF can be implemented in various ways depending on your project's requirements. Below is a breakdown of the most common approaches, their use cases, and a decision tree to help you choose the best approach.
 
@@ -129,7 +77,15 @@ DRF can be implemented in various ways depending on your project's requirements.
 
 This guide will provide a clear understanding of how to implement these approaches in Django Rest Framework (DRF) and when to use each one.
 
+| Approach                         | Description                                                                                   | When to Use                                                                 |
+|----------------------------------|-----------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------|
+| Dynamic Actions in a Single View | Handle multiple actions in one view using a parameter (e.g., action).                         | Small applications with simple forms and limited actions.                  |
+| Separate Views for Each Action   | Create separate views for each action (e.g., register, signin, logout).                       | Medium to large applications with complex logic for each action.           |
+| Hybrid Approach                  | Combine Django templates for server-side rendering with DRF APIs.                            | Monolithic applications with tightly coupled backend and frontend.         |
+| Advanced Renderer Usage          | Customize response formats using DRF renderers (e.g., JSON, HTML, plain text).               | When you need to support multiple response formats.                        |
+| Redirection and HTML Rendering   | Use redirect and TemplateHTMLRenderer to navigate and render HTML pages.                     | When you need to redirect users and render HTML templates.                 |
 
+---
 
 
 ## **6. Combining All Approaches**
@@ -286,7 +242,7 @@ D -->|Save user| F[Database]
 
 
 
-**Deserialization we use when to  do these →Create,update and delete**
+**Deserialization**
 
 For this flow
 
@@ -294,7 +250,7 @@ Extract data from request body
 
 As it is in stream mean in bytes so parse it in python data through JSON parser and then this python data pass to the serializer and after validation will be saved and then simple show the message of data created successfully
 
-Here serializer working for both serialization (which get the model instance and the pass to the serializer and the convert to json through JSON renderer and then send to the front end and its mostly for just data reading)and deserialization involve create, update delete actions
+Here serializer working for both serialization (which get the model instance and the pass to the serializer and the convert to json through JSON renderer and then send to the front end and its mostly for just data reading)and ***deserialization involve create, update delete actions***
 
 **Field level validation** 
 ```python
