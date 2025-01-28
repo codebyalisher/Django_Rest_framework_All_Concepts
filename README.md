@@ -166,7 +166,7 @@ You can combine the above approaches to build a flexible and powerful applicatio
 
 - **No** → Use **Hybrid Approach**.
 
-  ## Django Component Interactions
+  ## Django Component Interactions(models,serializers,views,utility functions,customs and built-in functionalities)
 This document outlines how Django components—models, managers, serializers, views, and utility functions—can interact with each other. This includes use cases, integration patterns, and flow diagrams.
 
 ### Tabular Summary
