@@ -778,7 +778,126 @@ In `APIView` or `ViewSet`:
 - ViewSets and CRUD actions rely on the request methods to determine the appropriate database operations (via ORM).
 - While request methods signal client intent, the actual database operations are controlled by your view logic or DRF's built-in methods in `ViewSet` and `ModelViewSet`.
 
+### AdminPanel:
+-This is also created by the same model which we have created for the user either it is end user or admin, to make it admin mean to show all the users details with showing the details in separate profile as he click on that user,to get this set the url with the id to keep it dynamic, for this specific user view and template.**flow for this admin panel working** as the user login either end or admin with the same form then check here type of user and then show the profile to related that user.and also if he want to perform the CRUD operations on his profile ,so after saving then show him updated profile. so this is the overview how it will work.
+```
+from django.shortcuts import render, redirect
+from django.contrib.auth import logout
+from .forms import EditUserProfileForm, EditAdminProfileForm
+from django.contrib.auth.models import User
 
+# Admin Panel view
+def Admin_user_profile(request):
+    if request.user.is_authenticated:
+        if request.method == "POST":
+            if request.user.is_superuser == True:
+                fm = EditAdminProfileForm(request.POST, instance=request.user)
+                users = User.objects.all()
+            else:
+                users=None
+                fm = EditUserProfileForm(request.POST, instance=request.user)
+            if fm.is_valid():
+                messages.success(request, 'Profile Updated !!!')
+                fm.save()
+        else:
+            if request.user.is_superuser == True:
+                fm = EditAdminProfileForm(instance=request.user)
+                users = User.objects.all()
+            else:
+                users=None
+                fm = EditUserProfileForm(instance=request.user)
+            return render(request, 'enroll/profile.html', {'name': request.user.username, 'form':fm, 'users':users})
+    else:
+        return HttpResponseRedirect('/login/')
 
+def user_profile(request,id): #this will be used when on admin side we will click on user and then we will see the profile of that user
+    if request.user.is_authenticated:
+        pk=User.objects.get(pk=id)
+        fm = EditAdminProfileForm(instance=pk)
+        return render(request, 'enroll/profile.html', {'name': request.user.username, 'form':fm})
+    else:
+        return HttpResponseRedirect('/login/')
 
+# Logout
+def user_logout(request):
+    logout(request)
+    return redirect('/login/')
+```
+---
+**Metaclasses**
+
+Metaclasses are also the way of structuring a program like other paradigms with unique functionalities such as the addition/accessibility of the attributes and methods to its instances classes,mean the classes which are inherited from metaclass, a metaclass itself is inherited from the type class which is itself a metaclass.a metaclass creates and defines the behavior of other classes, since classes themselves are objects. By defining your own metaclass, you can customize class creation, attributes, and methods for a variety of purposes such as adding additional attributes to classes, enforcing constraints on the creation of classes.metaclasses are primarily used in libraries and frameworks that require advanced customization of class behavior . You can think metaclass as a factory blueprint for creating the other factories(classes).A class is a factory blueprint for creating object, so object is the final product created by factory. i.e. instance/object-->class-->metaclass-->type.                                                                                                                                                                                        
+***Following Metaclass Methods are used :***
+```new(cls, name, bases, dct):
+Controls how the class object is created.
+init(cls, name, bases, dct):
+Initializes the class after creation.
+call(cls, args, *kwargs):
+Controls the behavior of class instances.
+prepare(cls, name, bases):
+Customizes the class dictionary creation.,
+    here are the following use cases where metaclasses are implemented: 1-use the type function to dynamically create classes,2-Enforcing Class Constraints,3-Singleton Pattern Using Metaclass,4-Automatically Register Subclasses
+A metaclass can automatically register all subclasses of a class.,5-To add the additional attributes and methods to the classes that are created with metaclass.6-Adding functionality to classes based on decorators or other annotations,7-Implementing domain-specific languages (DSLs).i.e implementaion for the better understanding as
+class MyMeta(type):
+    def new(cls, name, bases, attrs):
+        attrs['new_attribute'] = 'Hello, World!'
+        attrs['new_method'] = lambda self: 'Hello from a new method!'
+        return super().new(cls, name, bases, attrs)
+
+class MyClass(metaclass=MyMeta):
+    pass
+
+obj = MyClass()
+print(obj.new_attribute)  # Output: 'Hello, World!'
+print(obj.new_method())   # Output: 'Hello from a new method!'
+```
+---
+### CORS(cross origin request sharing)
+`when an web app on one domain attempts to access resources from antoher domain/url without proper permisssion.this is security feature implemented by browser`
+
+## WSGI(web server gateway interface)/ASGI(asynchrounous server gateway interface)
+![image](https://github.com/user-attachments/assets/f5ad09cf-4383-4a0d-9895-1d30c067e562)
+
+### WSGI
+As we know a Web server is a program that uses HTTP (Hypertext Transfer Protocol) to serve the files that form Web pages to users, in response to their requests, which are forwarded by their computers’ HTTPclients.
+You can visit this link for furthere details: https://medium.com/@ksarthak4ever/django-request-response-cycle-2626e9e8606e
+**ASGI AND WSGI** ,Both are interfaces/gateways to communicate/connect the web servers and python web application.ASGI it works asynchrounous and is used for modern long live connections e.g. web-sockets .Also `Fastapi is ASGI based as it works asynchronous`. While WSGI work synchronously used for traditional django applications.that's why django is sychronous as it used WSGI.
+`WSGI is a tool created to solve a basic problem: connecting a web server to a web framework. WSGI has two sides: the ‘server’ side and the ‘application’ side. To handle a WSGI response, the server executes the application and provides a callback function to the application side. The application processes the request and returns the response to the server using the provided callback. Essentially, the WSGI handler acts as the gatekeeper between your web server (Apache, NGINX, etc) and your Django project.`
+
+Between the server and the application lie the middlewares. You can think of middlewares as a series of bidirectional filters: they can alter (or short-circuit) the data flowing back and forth between the network and your Django application.
+
+***The Big Picture — Data Flow
+When the user makes a request of your application, a WSGI handler is instantiated, which:
+imports your settings.py file and Django’s exception classes.
+loads all the middleware classes it finds in the MIDDLEWARE_CLASSES or MIDDLEWARES(depending on Django version) tuple located in settings.py
+builds four lists of methods which handle processing of request, view, response, and exception.
+loops through the request methods, running them in order
+resolves the requested URL
+loops through each of the view processing methods
+calls the view function (usually rendering a template)
+processes any exception methods
+loops through each of the response methods, (from the inside out, reverse order from request middlewares)
+finally builds a return value and calls the callback function to the web server***
+
+Let’s get started.
+
+`Layers of Django Application
+Request Middlewares
+URL Router(URL Dispatcher)
+Views
+Context Processors
+Template Renderers
+Response Middlewares
+Whenever the request comes in it is handled by the Request middlewares. We can have multiple middlewares. we can find it in project settings(settings.py). Django request middlewares follows the order while processing the request. Suppose if we have request middlewares in the order A, B, C then the request first processed by the middleware A and then B and then C. Django comes up with bunch of default middlewares. We can also write our own or custom middlewares. After request processed by the middlewares it will be submitted to the URL Router or URL dispatcher.`
+
+`URL Router will take the request from the request middleware and it takes the URL Path from the request. Based on the url path URL router will tries to match the request path with the available URL patterns. These URL patterns are in the form of regular expressions. After matching the URL path with available URL patterns the request will be submitted to the View which is associated with the URL.`
+
+`Now, we are in business logic layer Views. Views processes the business logic using request and request data(data sent in GET, POST, etc). After processing the request in the view the request is sent context processors, by using the request context processors adds the context data that will help Template Renderers to render the template to generate the HTTP response.`
+
+`Again the request will send back to the Response middlewares to process it. Response middlewares will process the request and adds or modifies the header information/body information before sending it back to the client(Browser). After the browser will process and display it to the end user.`
+
+**Middlewares**
+Middlewares are employed in a number of key pieces of functionality in a Django project: for example :~ we use CSRF middlewares to prevent cross-site request forgery attacks. They’re used to handle session data. Authentication and authorization is accomplished with the use of middlewares. We can write our own middleware classes to shape (or short-circuit) the flow of data through your application.
+***These are the functions that have the access to the request and response object and next middleware function in application request-response cycle.It performs changes to request and response objects.End reqeust response cycle.call the next middleware function.***
+`
 
