@@ -314,7 +314,7 @@ Mean concrete Apiview extends both genericapiview and mixinmodelview and no need
 **4-custom authentication**
 
 **5-jwt authentication**
-
+this bascially involves the atuhentication withou using the db as othere use the db for storign the token and accessing it ,but its cons is that it do issue for peromfrmance if many requests done,so here jwt come,it uses token which has 3 parts for information i.e. headers,payload,jwt id,user id and other etc.this is safe for api requesting ,to use it in django we use built in classes in urls.py file like import them `obtainparitoken`,`refreshtoken`,`verifytoken` from jwt and make url for each class,and set the other factors for it like time for refresh token,bearer type etc. ***to use either Globally set in settings.py file along with factors***,to use it in ***view,first import jwtauthentication from jwt,and then use it in that specific view for which you have to set it for authentication and use it like similar ,permisssion classes and custom authentication***   
 **Authentications:**
 
 **1-Basic authentication**(it uses HTTP authentication which uses user's username and password for authentication, it's mostly do for the testing purposes but for production then use this over https and re-request user's username and password.
