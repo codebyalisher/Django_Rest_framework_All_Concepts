@@ -314,7 +314,46 @@ Mean concrete Apiview extends both genericapiview and mixinmodelview and no need
 **4-custom authentication**
 
 **5-jwt authentication**
-this bascially involves the atuhentication withou using the db as othere use the db for storign the token and accessing it ,but its cons is that it do issue for peromfrmance if many requests done,so here jwt come,it uses token which has 3 parts for information i.e. headers,payload,jwt id,user id and other etc.this is safe for api requesting ,to use it in django we use built in classes in urls.py file like import them `obtainparitoken`,`refreshtoken`,`verifytoken` from jwt and make url for each class,and set the other factors for it like time for refresh token,bearer type etc. ***to use either Globally set in settings.py file along with factors***,to use it in ***view,first import jwtauthentication from jwt,and then use it in that specific view for which you have to set it for authentication and use it like similar ,permisssion classes and custom authentication***   
+this bascially involves the atuhentication withou using the db as othere use the db for storign the token and accessing it ,but its cons is that it do issue for peromfrmance if many requests done,so here jwt come,it uses token which has 3 parts for information i.e. headers,payload,jwt id,user id and other etc.this is safe for api requesting ,to use it in django we use built in classes in urls.py file like import them `obtainparitoken`,`refreshtoken`,`verifytoken` from jwt and make url for each class,and set the other factors for it like time for refresh token,bearer type etc. ***to use either Globally set in settings.py file along with factors***,to use it in ***view,first import jwtauthentication from jwt,and then use it in that specific view for which you have to set it for authentication and use it like similar ,permisssion classes and custom authentication***
+
+**6-Djoser Authentication**
+REST implementation of Django authentication system. djoser library provides a set of Django Rest Framework views to handle basic actions such as registration, login, logout, password reset and account activation. It works with custom user model.
+```Available endpoints¶
+/users/
+
+/users/me/
+
+/users/resend_activation/
+
+/users/set_password/
+
+/users/reset_password/
+
+/users/reset_password_confirm/
+
+/users/set_username/
+
+/users/reset_username/
+
+/users/reset_username_confirm/
+
+/token/login/ (Token Based Authentication)
+
+/token/logout/ (Token Based Authentication)
+
+/jwt/create/ (JSON Web Token Authentication)
+
+/jwt/refresh/ (JSON Web Token Authentication)
+
+/jwt/verify/ (JSON Web Token Authentication)
+```
+
+***Supported authentication backends¶
+Token based authentication from DRF
+JSON Web Token authentication from django-rest-framework-simplejwt
+for furthere visit thsi link:https://djoser.readthedocs.io/en/latest/introduction.html
+.***
+
 **Authentications:**
 
 **1-Basic authentication**(it uses HTTP authentication which uses user's username and password for authentication, it's mostly do for the testing purposes but for production then use this over https and re-request user's username and password.
