@@ -337,6 +337,115 @@ You can combine the above approaches to build a flexible and powerful applicatio
 
 Backend development in Django and DRF requires a structured approach. By breaking down problems into smaller tasks (models, views, serializers), and thinking about data flow, you can gradually build up your skills. Don’t be afraid to tackle small projects, and remember to handle edge cases and test your code thoroughly.
 
+## . Scenarios for Implementing Functionality
+
+### 1 When to Use Serializer for Logic
+- **Field Validation**: Use the serializer to validate individual fields (e.g., check if an email is valid).
+- **Custom Validation**: Use the serializer's `validate` method for custom checks (e.g., password and confirm password match).
+- **Data Transformation**: Use the serializer to preprocess data (e.g., hashing passwords).
+- **Database Operations**: Use the serializer’s `create` or `update` methods for saving or updating records.
+
+### 2 When to Use View for Logic
+- **Authentication**: Handle authentication logic (e.g., calling Django’s `authenticate` function) in the view.
+- **Token Generation**: Use the view to generate and return tokens for authenticated users.
+- **Custom Response Handling**: Use the view to customize the response (e.g., custom error messages or status codes).
+
+# Summary of Scenarios, Key Takeaways, and Code Examples
+
+## 1. **Summary of Scenarios**
+
+### 1.1 **When to Use Serializer for Logic**
+- **Field Validation**: Validate individual fields like email or password.
+- **Custom Validation**: Implement logic for custom validations (e.g., matching passwords).
+- **Data Transformation**: Preprocess data (e.g., hashing passwords).
+- **Database Operations**: Use serializer methods (`create` or `update`) to save or modify database records.
+
+### 1.2 **When to Use View for Logic**
+- **Authentication**: Handle user authentication in the view (e.g., `authenticate` function).
+- **Token Generation**: Generate and return authentication tokens for logged-in users.
+- **Custom Response Handling**: Customize responses, such as returning specific error messages or status codes.
+
+---
+
+## 2. **Key Takeaways**
+
+### 2.1 **Use the Serializer for:**
+- **Data Validation**: Ensures that incoming data is valid before saving.
+- **Data Transformation**: Can manipulate or transform data (e.g., hashing passwords).
+- **Database Operations**: The `create` or `update` methods save or modify data in the database.
+
+### 2.2 **Use the View for:**
+- **Authentication**: Authenticate users based on their credentials.
+- **Token Generation**: Handle token generation for authenticated users.
+- **Custom Response Handling**: Customize responses (success or error) returned to the user.
+
+### 2.3 **Separation of Concerns:**
+- The **serializer** focuses on **data validation** and **database operations**.
+- The **view** handles the **business logic**, such as **authentication** and **token generation**, and responds to the client.
+
+---
+
+## 3. **Code Examples**
+
+### 3.1 **User Registration Serializer**
+```python
+class UserRegistrationSerializer(serializers.ModelSerializer):
+    password = serializers.CharField(style={'input_type': 'password'}, write_only=True)
+    confirm_password = serializers.CharField(style={'input_type': 'password'}, write_only=True)
+
+    class Meta:
+        model = User
+        fields = ['email', 'password', 'confirm_password']
+        extra_kwargs = {'password': {'write_only': True}}
+
+    def validate(self, data):
+        password = data.get('password')
+        confirm_password = data.get('confirm_password')
+        if password != confirm_password:
+            raise serializers.ValidationError('Password is not valid')
+        return data
+
+    def create(self, validated_data):
+        validated_data.pop('confirm_password', None)
+        return User.objects.create_user(**validated_data)
+```
+### 3.2 **User Login Serializer**
+```class UserLoginSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ['email', 'password']
+```
+### 3.3 **User registration view**
+```class UserRegistrationView(APIView):
+    renderer_classes = [UserRenderers]
+
+    def post(self, request, format=None):
+        serializer = UserRegistrationSerializer(data=request.data)
+        if serializer.is_valid(raise_exception=True):
+            user = serializer.save()
+            token = get_tokens_for_user(user)
+            return Response({'message': 'User created successfully', 'user_data': user, 'token': token}, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors)
+```
+### 3.4 **User Login view**
+```class UserLoginView(APIView):
+    renderer_classes = [UserRenderers]
+
+    def post(self, request):
+        serializer = UserLoginSerializer(data=request.data)
+        if serializer.is_valid(raise_exception=True):
+            email = serializer.data.get('email')
+            password = serializer.data.get('password')
+            user = authenticate(email=email, password=password)
+            if user is not None:
+                token = get_tokens_for_user(user)
+                return Response({'message': 'Login successful', 'user_data': user, 'token': token}, status=status.HTTP_200_OK)
+            else:
+                return Response({'errors': {'non_field_errors': ['Password or email is not valid']}}, status=status.HTTP_404_NOT_FOUND)
+```
+
+---
+
 ## WSGI(web server gateway interface)/ASGI(asynchrounous server gateway interface)
 ![image](https://github.com/user-attachments/assets/f5ad09cf-4383-4a0d-9895-1d30c067e562)
 
