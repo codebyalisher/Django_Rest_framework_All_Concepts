@@ -167,6 +167,175 @@ You can combine the above approaches to build a flexible and powerful applicatio
 - **No** → Use **Hybrid Approach**.
 
   ---
+  # Guide to Backend API Development in Django & Django REST Framework
+
+## 1. How to Start a New Project
+
+### 1.1 Understand the Requirements:
+- **Entities**: Identify the entities you are working with (e.g., `BankAccount`, `Deposit`).
+- **Actions**: Determine the actions your API needs to perform (e.g., Create Deposit, Get Account Balance).
+- **Data**: What data needs to be stored (e.g., `account_number`, `balance`, `amount`, etc.)?
+
+### 1.2 Set Up Your Django Project and App:
+1. **Create a new Django project**:
+    ```bash
+    django-admin startproject bank_system
+    cd bank_system
+    ```
+
+2. **Create a Django app**:
+    ```bash
+    python manage.py startapp accounts
+    ```
+
+3. **Add the app in `settings.py`**:
+    ```python
+    INSTALLED_APPS = [
+        'accounts',  # Your app
+        'rest_framework',  # DRF for API handling
+    ]
+    ```
+
+4. **Create Models**:
+    Define models for your entities:
+    ```python
+    # accounts/models.py
+    from django.db import models
+
+    class BankAccount(models.Model):
+        account_number = models.CharField(max_length=20, unique=True)
+        account_holder = models.CharField(max_length=100)
+        balance = models.DecimalField(max_digits=10, decimal_places=2)
+
+    class Deposit(models.Model):
+        account = models.ForeignKey(BankAccount, on_delete=models.CASCADE)
+        amount = models.DecimalField(max_digits=10, decimal_places=2)
+        deposit_date = models.DateTimeField(auto_now_add=True)
+    ```
+
+5. **Create Serializers**:
+    Define serializers to convert models into JSON and vice versa:
+    ```python
+    # accounts/serializers.py
+    from rest_framework import serializers
+    from .models import BankAccount, Deposit
+
+    class DepositSerializer(serializers.ModelSerializer):
+        class Meta:
+            model = Deposit
+            fields = ['amount', 'deposit_date']
+    
+    class BankAccountSerializer(serializers.ModelSerializer):
+        class Meta:
+            model = BankAccount
+            fields = ['account_number', 'account_holder', 'balance']
+    ```
+
+6. **Create Views for Your API**:
+    Define views for handling requests:
+    ```python
+    # accounts/views.py
+    from rest_framework import generics
+    from .models import BankAccount, Deposit
+    from .serializers import DepositSerializer, BankAccountSerializer
+    from rest_framework.exceptions import NotFound
+    from django.db.models import Sum
+
+    class DepositListView(generics.ListCreateAPIView):
+        serializer_class = DepositSerializer
+
+        def get_queryset(self):
+            account_number = self.kwargs['account_number']
+            try:
+                bank_account = BankAccount.objects.get(account_number=account_number)
+            except BankAccount.DoesNotExist:
+                raise NotFound("Bank account not found")
+            return Deposit.objects.filter(account=bank_account)
+
+        def perform_create(self, serializer):
+            account_number = self.kwargs['account_number']
+            bank_account = BankAccount.objects.get(account_number=account_number)
+            deposit = serializer.save(account=bank_account)
+            bank_account.balance += deposit.amount
+            bank_account.save()
+            return deposit
+    ```
+
+7. **Define URLs**:
+    Create URL routes for the views:
+    ```python
+    # accounts/urls.py
+    from django.urls import path
+    from . import views
+
+    urlpatterns = [
+        path('accounts/<str:account_number>/deposits/', views.DepositListView.as_view(), name='deposit-list'),
+    ]
+    ```
+
+8. **Test the API**:
+    Run the Django development server:
+    ```bash
+    python manage.py runserver
+    ```
+
+    Use Postman or `curl` to test the API.
+
+---
+
+## 3. How to Think About Logic for API Development
+
+### 3.1 Start by Breaking Down the Problem
+- **Entities**: Define what data you need to store (e.g., `BankAccount`, `Deposit`).
+- **Actions**: What will the API do? (e.g., Create Deposit, Get Balance).
+- **Data Flow**: Input (user request), Processing (business logic), Output (response).
+
+### 3.2 Define Data Flow
+- **Inputs**: What data is coming into the system? (e.g., deposit amount, account number).
+- **Processing**: How will the data be processed? (e.g., create deposit, update balance).
+- **Outputs**: What data will be returned? (e.g., account balance, success message).
+
+### 3.3 Handle Edge Cases
+- Invalid account number.
+- Negative or zero deposit amounts.
+- Unexpected errors during processing.
+
+### 3.4 Write Tests
+- Write unit tests for views.
+- Test edge cases to ensure proper handling of input and logic.
+
+---
+
+## 4. How to Know the Data Flow Execution
+
+1. **Models**: Understand the relationships between your data entities.
+2. **Views**: Views process the data and return a response.
+3. **Request Flow**: A request enters the system, goes through URL matching, is handled by the appropriate view, and the response is returned to the user.
+
+---
+
+## 5. Next Steps for Backend Development in Django
+
+### 5.1 Practice Small APIs
+- Start with simple CRUD operations and progressively add more complexity.
+
+### 5.2 Focus on Testing
+- Write unit tests for each view and API endpoint.
+
+### 5.3 Authentication
+- Implement authentication (JWT, OAuth, etc.) for a secure API.
+
+### 5.4 Pagination, Filtering, Sorting
+- Learn to implement pagination and filtering for large datasets.
+
+### 5.5 Explore DRF Features
+- Familiarize yourself with `ViewSets`, `ModelViewSets`, and other DRF tools to make your development more efficient.
+
+---
+
+## Conclusion
+
+Backend development in Django and DRF requires a structured approach. By breaking down problems into smaller tasks (models, views, serializers), and thinking about data flow, you can gradually build up your skills. Don’t be afraid to tackle small projects, and remember to handle edge cases and test your code thoroughly.
 
 ## WSGI(web server gateway interface)/ASGI(asynchrounous server gateway interface)
 ![image](https://github.com/user-attachments/assets/f5ad09cf-4383-4a0d-9895-1d30c067e562)
