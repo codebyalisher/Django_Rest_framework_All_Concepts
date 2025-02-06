@@ -12,7 +12,7 @@ Whenever implementing a project, follow the dynamic approach outlined below. Thi
 - Decide how Django Rest Framework (DRF) will be implemented based on project requirements.
   
 ## Project Directory Structure
--first Setup the Project Directory Structure
+- first Setup the Project Directory Structure
 
 ## 4. Entities & Relationships
 - Define entities (models) and their relationships (e.g., OneToMany, ManyToMany, etc.).
