@@ -528,7 +528,135 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
 ```
 
 ---
+# Understanding Serializer Methods: `create()`, `save()`, `update()`, `delete()`
 
+## 1. `create()` vs `save()`
+
+### `create()` method:
+- The **`create()`** method in serializers is explicitly called when you want to create a new instance of the model.
+- **`create()`** **requires** the validated data passed explicitly to it.
+- It's used when **creating** a new object (e.g., signing up a new user or creating a new record in your database).
+
+```python
+def create(self, validated_data):
+    # Use validated_data to create a new user
+    return User.objects.create_user(
+        email=validated_data['email'],
+        password=validated_data['password']
+    )
+```
+DRF internally calls create() when you call `serializer.save()` and are creating a new object.
+- `save()` **method**:
+The `save()` method is a more general method that can either `create` or `update` an object.
+When calling `serializer.save()`, it decides whether to create a new instance `(using create())` or update an existing instance `(using update())`.
+
+```def save(self):
+    # This is called when save() is triggered
+    if self.instance:
+        return self.update(self.instance, self.validated_data)
+    else:
+        return self.create(self.validated_data)
+```
+In most cases, you don’t need to manually call `create()` or `update()`. DRF handles this logic when you call `serializer.save()`
+### 2. update() Method:
+- The `update()` method is used to update an **existing** model instance.
+- When you have an existing object `(i.e., self.instance is not None)`, DRF calls the `update()` method to apply changes.
+
+```def update(self, instance, validated_data):
+    # Assuming we are updating a user
+    instance.email = validated_data.get('email', instance.email)
+    instance.password = validated_data.get('password', instance.password)
+    instance.save()  # Save the updated instance
+    return instance
+```
+**Flow for update:**
+- When updating an **existing** instance, `save()` calls the `update()` method to apply changes to that instance.
+
+**3. `delete()` Method:**
+- `delete()` is not implemented directly in serializers but is part of Django's model deletion logic.
+- Deleting an object is handled via a **view**, such as `APIView` or `ViewSet`, not inside the serializer.
+  Example in view:
+  
+```@api_view(['DELETE'])
+def delete_user(request, pk):
+    user = User.objects.get(pk=pk)
+    user.delete()
+    return Response({"message": "User deleted successfully."})
+```
+### Summary of Key Differences:
+`create():`
+- Creates a **new** instance of the model.
+- It's explicitly called when creating an object.
+  
+`save():`
+- A **general method** that either **creates or updates** an instance.
+- It automatically calls either `create()` (for new objects) or `update()` (for existing objects).
+  
+`update():`
+- Used for **updating** an existing model instance.
+- You manually implement this to modify an existing object.
+  
+`delete():`
+- **Not implemented in serializers** but handled by Django's ORM in views.
+
+### Example of Full Flow:
+**Creating a user:**
+When creating a new user, DRF will call `create():`
+
+```class UserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ['email', 'password']
+
+    def create(self, validated_data):
+        return User.objects.create_user(
+            email=validated_data['email'],
+            password=validated_data['password']
+        )
+```
+**Updating a user:**
+
+When updating a user, DRF will call `update():`
+
+```class UserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ['email', 'password']
+
+    def update(self, instance, validated_data):
+        instance.email = validated_data.get('email', instance.email)
+        instance.password = validated_data.get('password', instance.password)
+        instance.save()  # Save the updated instance
+        return instance
+```
+**Flow in the View:**
+
+```@api_view(['POST', 'PUT'])
+def user_view(request, pk=None):
+    if pk:
+        user = User.objects.get(pk=pk)
+        serializer = UserSerializer(user, data=request.data, partial=True)
+    else:
+        serializer = UserSerializer(data=request.data)
+    
+    if serializer.is_valid():
+        serializer.save()  # This will call create or update based on existence of `user`
+        return Response(serializer.data)
+    return Response(serializer.errors, status=400)
+```
+**Conclusion:**
+- `create()` is called explicitly to create a new object (you pass `validated_data` to it).
+- `save()` is a more generic method that either creates or updates an object, depending on whether it's a new object or an existing one. The `save()` method in a serializer is **implicitly called** after the serializer has been `validated`. You don’t need to pass `validated_data` to `save()` because DRF handles this `internally`. When you call `serializer.is_valid()`, the serializer validates the data and **automatically** `fills` `validated_data` with the `cleaned_data`, which is then used by the `save()` method.
+
+```def save(self):
+    email = self.validated_data['email']
+    password = self.validated_data['password']
+    # Logic for reset ...
+```
+- The `validated_data` is passed to the `create()` or `update()` method explicitly by DRF when creating or updating a user. This is why you can access validated_data['data'] directly inside the serializer as this data is passed from the view side.
+- `update()` is used to update an existing object.
+- `delete()` is handled by Django ORM and is typically used within views, not serializers.
+  
 ## WSGI(web server gateway interface)/ASGI(asynchrounous server gateway interface)
 ![image](https://github.com/user-attachments/assets/f5ad09cf-4383-4a0d-9895-1d30c067e562)
 
