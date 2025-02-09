@@ -166,10 +166,9 @@ This guide will provide a clear understanding of how to implement these approach
 | Separate Views for Each Action   | Create separate views for each action (e.g., register, signin, logout).                       | Medium to large applications with complex logic for each action.           |
 | Hybrid Approach                  | Combine Django templates for server-side rendering with DRF APIs.                            | Monolithic applications with tightly coupled backend and frontend.         |
 | Advanced Renderer Usage          | Customize response formats using DRF renderers (e.g., JSON, HTML, plain text).               | When you need to support multiple response formats.                        |
-| Redirection and HTML Rendering   | Use redirect and TemplateHTMLRenderer to navigate and render HTML pages.                     | When you need to redirect users and render HTML templates.                 |
+| Redirection and HTML Rendering   | Use redirect and TemplateHTMLRenderer to navigate and render HTML pages.                     | When you need to redirect users and render HTML templates.                |
 
 ---
-
 
 ## **6. Combining All Approaches**
 
@@ -1047,6 +1046,185 @@ For multiple read-only fields, define them under the `Meta` class.
    ```
 4. **Custom Authentication**: Inherit `BaseAuthentication` and override the `authenticate` method.
 5. **JWT Authentication**: JSON Web Token-based authentication.
+
+# 📖 Role-Based Access Control (RBAC) along with the permissions in Django
+
+## 🚀 1️⃣ How Roles Can Be Created?
+Roles in Django can be created in **three different ways**:
+
+### **1️⃣ Using Django Groups (Recommended)**
+- Django has a built-in `Group` model.
+- You create groups like `Admin`, `Staff`, and `User`.
+- Assign permissions to each group dynamically.
+
+### **2️⃣ Using Custom User Model (Static Role Field)**
+- Add a `role` field to the `User` model (`admin`, `staff`, `user`).
+- Check the role directly instead of using Django Groups.
+
+### **3️⃣ Using Django Permissions (Fine-Grained Control)**
+- Assign **permissions** like `can_add_book`, `can_delete_book` to users.
+- Use `has_permission` checks in API views.
+
+---
+
+## 🔑 2️⃣ Where Are Roles & Permissions Set?
+| **Level** | **Where Roles Are Created?** | **Where Permissions Are Set?** | **Usage** |
+|-----------|------------------|-------------------|---------|
+| **Database Level (Model-based roles)** | Add `role` field to `User` model | Custom role-check logic | When roles are static |
+| **Group Level (Django Groups)** ✅ | Create groups (`Admin`, `Staff`, `User`) | Assign built-in permissions | Best for dynamic roles |
+| **Permission Level (Django Permissions)** | N/A | Assign specific permissions (`can_add_book`, `can_borrow_book`) | Best for fine-grained control |
+
+---
+
+## **1️⃣ Using Django Groups (Recommended Approach)**
+This method allows **dynamic role management** via Django’s admin panel.
+
+### **Steps:**
+#### **1. Create Groups (`Admin`, `Staff`, `User`)**
+```python
+from django.contrib.auth.models import Group, Permission
+
+# Create Groups
+admin_group, _ = Group.objects.get_or_create(name='Admin')
+staff_group, _ = Group.objects.get_or_create(name='Staff')
+user_group, _ = Group.objects.get_or_create(name='User')
+
+# Assign Permissions (Example)
+permission = Permission.objects.get(codename='add_book')  # Allow Staff to add books
+staff_group.permissions.add(permission)
+```
+
+#### **2. Assign Users to Groups**
+```python
+user = User.objects.get(username='john')
+user.groups.add(staff_group)  # Now 'john' has Staff permissions
+```
+
+#### **3. Restrict Access Using Groups**
+```python
+from rest_framework.permissions import BasePermission
+
+class IsAdminUser(BasePermission):
+    def has_permission(self, request, view):
+        return request.user.groups.filter(name='Admin').exists()
+```
+
+✅ **Best For:** Large applications with multiple roles that might change dynamically.
+
+---
+
+## **2️⃣ Using a Custom Role Field in the User Model**
+If roles are static (e.g., Admin, Staff, User), you can modify the Django `User` model.
+
+### **Modify User Model:**
+```python
+from django.contrib.auth.models import AbstractUser
+from django.db import models
+
+class CustomUser(AbstractUser):
+    ROLE_CHOICES = (
+        ('admin', 'Admin'),
+        ('staff', 'Staff'),
+        ('user', 'User'),
+    )
+    role = models.CharField(max_length=10, choices=ROLE_CHOICES, default='user')
+```
+
+### **Use in Permissions:**
+```python
+from rest_framework.permissions import BasePermission
+
+class IsStaffOrAdmin(BasePermission):
+    def has_permission(self, request, view):
+        return request.user.is_authenticated and request.user.role in ['admin', 'staff']
+```
+
+✅ **Best For:** When roles are predefined and don’t need frequent updates.
+
+---
+
+## **3️⃣ Using Django’s Built-in Permissions**
+Django provides four default permissions for each model:
+- `add_<modelname>`
+- `change_<modelname>`
+- `delete_<modelname>`
+- `view_<modelname>`
+
+### **Assign Permissions:**
+```python
+from django.contrib.auth.models import Permission
+
+permission = Permission.objects.get(codename='add_book')
+user.user_permissions.add(permission)
+```
+
+### **Check Permissions in Views:**
+```python
+from rest_framework.permissions import DjangoModelPermissions
+
+class BookViewSet(viewsets.ModelViewSet):
+    permission_classes = [DjangoModelPermissions]
+```
+
+✅ **Best For:** Fine-grained access control (e.g., allowing some staff to edit books but not delete them).
+
+---
+
+## **How It Works in Your Current Code**
+Your **current implementation** mostly follows the **permissions-based approach** but lacks **Groups-based access control**.
+
+### **1. Permissions Applied in Your Code:**
+- `IsAdminOrReadOnly` → Only admins can modify books/authors.
+- `IsAdminOrStaff` → Admins and staff have more access.
+- `IsAuthenticated` → Only logged-in users can borrow books.
+
+### **2. Where to Improve?**
+- **Use Django Groups** (`Admin`, `Staff`, `User`) to manage access **dynamically**.
+- Assign `Group`-based access to views instead of hardcoded permissions.
+
+---
+
+## **Final Recommendation**
+If your app has multiple user roles and **you want dynamic control**, **Django Groups** is the best approach.
+
+## 🎯 3️⃣ What’s Happening Behind the Scenes?  
+
+### **⚡ Before (Your Code Was Doing This)**
+❌ Only checking `is_staff`, which is a built-in Django field.  
+❌ No concept of “User Roles” explicitly.  
+❌ Harder to manage if new roles (like "Librarian") are needed.  
+
+### **✅ After (With Groups & Permissions)**
+✔ Users are assigned to **Groups** (`Admin`, `Staff`, `User`).  
+✔ Views check if the user **belongs to a group** instead of just `is_staff`.  
+✔ Easier to manage **roles dynamically** (e.g., add a new "Librarian" role later). 
+
+---
+
+## 🏆 5️⃣ Final Answer to Your Question
+
+### **Q: Where are roles being created?**
+✔ By default, Django does **NOT** create roles explicitly.  
+✔ We create roles using **Django Groups** (`Admin`, `Staff`, `User`).  
+
+### **Q: Where are permissions being set?**
+✔ Django has **built-in permissions** (`add_book`, `delete_book`, etc.).  
+✔ We assign these permissions to **Groups** (`Admin`, `Staff`).  
+✔ Your **custom permission classes** (`IsAdminOrReadOnly`, `IsAuthenticated`) enforce them.  
+
+### **Q: How do roles and permissions interact?**
+✔ **Roles (Groups)** bundle multiple **permissions** together.  
+✔ **Users are assigned roles** (via Groups).  
+✔ **Permissions are applied** based on roles.
+
+---
+
+## 🎯 6️⃣ What Should You Do Next?
+
+✅ **Option 1:** Modify your code to use **Django Groups** for role-based access.  
+✅ **Option 2:** Keep your current setup, but apply finer **role-based permissions**.  
+
+**Would you like me to modify your code to use Groups for better role management?** 🚀
 
 #### Permissions
 - Specific to classes or functions using decorators or inside the class.
