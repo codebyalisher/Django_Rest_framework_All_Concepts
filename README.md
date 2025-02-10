@@ -763,6 +763,80 @@ def user_view(request, pk=None):
 - The `validated_data` is passed to the `create()` or `update()` method explicitly by DRF when creating or updating a user. This is why you can access validated_data['data'] directly inside the serializer as this data is passed from the view side.
 - `update()` is used to update an existing object.
 - `delete()` is handled by Django ORM and is typically used within views, not serializers.
+### Django Signals
+
+  `Django provides several built-in signals that can be used to trigger specific actions in response to certain events`. For example, `the pre_save and post_save signals are sent before and after an object is saved to the database`, respectively. Similarly, `the pre_delete and post_delete signals are sent before and after an object is deleted from the database`.
+
+`To use signals in Django`, you first `define the signal (i.e., the message)` that `you want to send`. `This is typically done by creating an instance of the django.dispatch.Signal class`. `You can then connect one or more receivers to the signal using the signal.connect() method`. `When the signal is sent, all connected receivers are called with the sender and any additional data that was provided`.
+
+`models.py:`
+
+```models.py:
+from django.contrib.auth.models import User
+from django.db.models.signals import post_save
+from django.dispatch import receiver
+
+class Profile(models.Model):
+    user =
+        ...
+
+    def __str__(self):
+        ...
+
+    def create_profile(sender, instance, created, **kwargs):
+        if created:
+            Profile.objects.create(user=instance)
+            print('****************')
+            print('Profile created!')
+            print('****************')
+
+    post_save.connect(create_profile, sender=User)
+
+    def update_profile(sender, instance, created, **kwargs):
+        if created is False:
+            instance.profile.save()
+            print('****************')
+            print('Profile Updated!')
+            print('****************')
+
+    post_save.connect(update_profile, sender=User)
+```
+
+Above’s an example of how signals can be used in Django ☝️
+
+In this example, we define a `signal` that is triggered after an instance of User is saved to the database. We then connect a `receiver function (create and update_profile)` to the signal using the `post_save.connect() method`.
+
+- When the `_post_save signal` is sent, the `create_profile() function` will be called with the `sender (User)` and any additional data that was provided.
+
+`signals.py:`
+
+```signals.py
+from django.contrib.auth.models import User
+from signal_app.models import Profile
+from django.db.models.signals import post_save
+from django.dispatch import receiver
+
+@receiver(post_save, sender=User)
+def create_profile(sender, instance, created, **kwargs):
+    if created:
+        Profile.objects.create(user=instance)
+        print('message')
+        print('Profile created!')
+        print('message')
+
+#post_save.connect(create_profile, sender=User)
+
+@receiver(post_save, sender=User)
+def update_profile(sender, instance, created, **kwargs):
+    if created is False:
+        instance.profile.save()
+        print('message')
+        print('Profile Updated!')
+        print('message')
+#post_save.connect(update_profile, sender=User)
+```
+
+- In this example, `we define a signal that is triggered before an instance of User is saved to the database`. We then `connect a receiver function (create & update)` to the `signal using the @receiver decorator`. `When the post_save signal is sent, the create_profile() function will be called with the sender (User) and any additional data that was provided (in case we just log console)`.
   
 ## WSGI(web server gateway interface)/ASGI(asynchrounous server gateway interface)
 ![image](https://github.com/user-attachments/assets/f5ad09cf-4383-4a0d-9895-1d30c067e562)
