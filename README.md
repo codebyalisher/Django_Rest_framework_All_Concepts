@@ -81,17 +81,16 @@ Whenever implementing a project, follow the dynamic approach outlined below. Thi
 - **Built-in Serializers**: Use DRF’s default serializers for simple cases.
 - **Custom Serializers**: Implement complex validation, transformation, and custom methods (e.g., for creating or updating records).
 - **let's clarify how serializer fields and the validate method work together in a Django REST Framework (DRF) serializer.**
-
+- ## Flow for the serializer working-->
+  ***as it is called inside the view the data in view is automatically passed to the serializer and that is then checked the structure of the data, 
 `Serializer Fields (like username and password)
 Serializer fields like username and password define the structure of the data you expect from the client (front end). They tell the serializer:`
-
 `What fields are expected.
 What type each field should be (e.g., CharField, IntegerField).
 How to handle the input (e.g., write_only=True to avoid returning sensitive data like a password in the response).
 What happens with serializer fields?
 When a request is sent to the view (usually through the viewset), the data is passed to the serializer. The serializer then takes that data and:`
-
-***Deserializes it, i.e., transforms it from the raw data (e.g., a JSON object) into a structured Python object that you can work with in your backend code.
+  Deserializes it, i.e., transforms it from the raw data (e.g., a JSON object) into a structured Python object that you can work with in your backend code.
 Validates the data based on the field types and constraints you defined (like making sure username is a string, and password is valid).
 If the data is valid, it is passed into the validate method, where you can add custom validation logic (e.g., checking if the user exists, checking if the password is correct, etc.).
 Purpose of the validate Method
