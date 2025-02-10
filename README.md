@@ -766,6 +766,9 @@ def user_view(request, pk=None):
 ## Django Signals
 
   `Django provides several built-in signals that can be used to trigger specific actions in response to certain events`. For example, `the pre_save and post_save signals are sent before and after an object is saved to the database`, respectively. Similarly, `the pre_delete and post_delete signals are sent before and after an object is deleted from the database`.
+  
+for furthere details you can read the details from this link--> https://www.sitepoint.com/understanding-signals-in-django/#settingupadjangoproject
+
 ### 1-Model signals
 Model signals are signals sent by the model system. These are signals sent when various events take place or are about to take place in our models. We can access the signals like so: django.db.models.signals.<the_signal_to_use>
 **`pre_save,post_save`**
