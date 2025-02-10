@@ -776,6 +776,15 @@ This signal is sent when Django starts processing a request.
 This signal is sent when Django finishes sending a HTTP response to a client.
 
 ### how to use the Custom Signals
+**Connecting signals in apps.py**
+So as to make the signal sending and receipt functionality available throughout the lifecycle of the application, we have to connect the signals in the app configuration file. We’re going to do this for all those  applications in which we have the singals.py files.
+```
+# library/apps.py
+def ready(self):
+    import library.signals
+```
+- `This addition in both apps ensures that signals will be sent when the request response cycle begins.`
+  
 **Creating the signal sender**.
 `Django provides two methods to enable signal sending. We can use Signal.send() or Signal.send_robust(). Their difference is that the send() method does not catch any exceptions raised by receivers.`
 To send a signal, the method takes the following format:
