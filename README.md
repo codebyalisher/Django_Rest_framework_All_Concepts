@@ -763,9 +763,79 @@ def user_view(request, pk=None):
 - The `validated_data` is passed to the `create()` or `update()` method explicitly by DRF when creating or updating a user. This is why you can access validated_data['data'] directly inside the serializer as this data is passed from the view side.
 - `update()` is used to update an existing object.
 - `delete()` is handled by Django ORM and is typically used within views, not serializers.
-### Django Signals
+## Django Signals
 
   `Django provides several built-in signals that can be used to trigger specific actions in response to certain events`. For example, `the pre_save and post_save signals are sent before and after an object is saved to the database`, respectively. Similarly, `the pre_delete and post_delete signals are sent before and after an object is deleted from the database`.
+### 1-Model signals
+Model signals are signals sent by the model system. These are signals sent when various events take place or are about to take place in our models. We can access the signals like so: django.db.models.signals.<the_signal_to_use>
+**`pre_save,post_save`**
+### 2-Request/response signals
+***request_started**
+This signal is sent when Django starts processing a request.
+***request_finished***
+This signal is sent when Django finishes sending a HTTP response to a client.
+
+### how to use the Custom Signals
+**Creating the signal sender**.
+`Django provides two methods to enable signal sending. We can use Signal.send() or Signal.send_robust(). Their difference is that the send() method does not catch any exceptions raised by receivers.`
+To send a signal, the method takes the following format:
+
+```Signal.send(sender, **kwargs)```
+
+**or**
+`to use in the project`
+
+```# orders/views.py
+from django.shortcuts import get_object_or_404
+from django.http import HttpResponse
+from django.dispatch import receiver
+from orders.models import Order
+
+def confirm_order(request, order_id):
+    if request.method == 'POST':
+        order = get_object_or_404(Order, id=order_id)
+
+        # Perform order confirmation logic here
+
+        # Send the order_confirmed signal
+        # the sender of the signal is the order that just been confirmed
+        order_confirmed.send(sender=order)
+
+        return HttpResponse(f"Order {order_id} confirmed successfully.")
+    else:
+        return HttpResponse("Invalid request method. Use POST to confirm the order.")
+```
+**Connecting a signal handler (receiver)**
+A signal handler is a function that gets executed when an associated signal is sent. Django provides two ways of connecting a handler to a signal sender. `We can connect the signal manually, or we can use the receiver decorator`.
+**Manual connection**
+If we choose to do it manually, we can do it this way:
+```# products/signals.py
+from orders.signals import order_confirmed
+order_confirmed.connect(<the_signal_handler_function>)
+```
+**Using the decorator**
+`Using the @receiver decorator`, we’re able to associate a signal sender with a particular signal handler. Let’s use this method. `Create a function that will update the inventory when the order_confirmed signal is sent. This handler will be in products app`. Open the products/signals.py file and put it the following code:
+```# products/signals.py
+from django.dispatch import receiver
+from orders.signals import order_confirmed
+
+@receiver(order_confirmed)
+def update_quantity_on_order_confirmation(sender, **kwargs):
+    """
+    Signal handler to update the inventory when an order is confirmed.
+    """
+    # Retrieve the associated product from the order
+    product = sender.product
+
+    # Update the inventory
+    product.quantity -= sender.quantity
+    product.save()
+
+    print(f"Quantity updated for {product.name}. New quantity: {product.quantity}")
+```
+The `handler function` should always take in a sender and &ast;&ast;kwargs arguments. Django will throw an error if we write the function without the &ast;&ast;kwargs arguments. That is a pre-emptive measure to ensure our handler function is able to handle arguments in future if they arise.
+### How to use built-in signals in a project
+`Using built-in signals in a project is not so different from using custom signals. The only difference is that we don’t need to manually initialize sending the signal, since it’s sent out automatically by the framework whether there’s a receiver registered or not. In other words, we don’t have to explicitly call a methods like Signal.send() to trigger built-in signals, as Django takes care of that.`
 
 `To use signals in Django`, you first `define the signal (i.e., the message)` that `you want to send`. `This is typically done by creating an instance of the django.dispatch.Signal class`. `You can then connect one or more receivers to the signal using the signal.connect() method`. `When the signal is sent, all connected receivers are called with the sender and any additional data that was provided`.
 
