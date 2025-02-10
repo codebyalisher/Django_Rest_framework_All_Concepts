@@ -1120,6 +1120,13 @@ Mean concrete Apiview extends both genericapiview and mixinmodelview and no need
 **5-jwt authentication**
 this bascially involves the atuhentication withou using the db as othere use the db for storign the token and accessing it ,but its cons is that it do issue for peromfrmance if many requests done,so here jwt come,it uses token which has 3 parts for information i.e. headers,payload,jwt id,user id and other etc.this is safe for api requesting ,to use it in django we use built in classes in urls.py file like import them `obtainparitoken`,`refreshtoken`,`verifytoken` from jwt and make url for each class,and set the other factors for it like time for refresh token,bearer type etc. ***to use either Globally set in settings.py file along with factors***,to use it in ***view,first import jwtauthentication from jwt,and then use it in that specific view for which you have to set it for authentication and use it like similar ,permisssion classes and custom authentication***
 
+#### Set Environment Variables
+***To set the environment variables globally in postman ,1- first crate the environment,2- then this code write in the login end point for default seting the values of access,refresh tokens***
+```const responseData = pm.respose.json()
+pm.environment.set('access-token',responseData.token.access)
+pm.environment.set('refresh-token',responseData.token.refresh)
+```
+
 **6-Djoser Authentication**
 REST implementation of Django authentication system. djoser library provides a set of Django Rest Framework views to handle basic actions such as registration, login, logout, password reset and account activation. It works with custom user model.
 ```Available endpoints¶
