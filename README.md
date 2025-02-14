@@ -984,6 +984,11 @@ Whenever the request comes in it is handled by the Request middlewares. We can h
 - **channels layers** are used to send the or receive the messages  across consumers or machines,....
 - **grouping** is basically to send or receive messages to multiple or group of consumers e.g chat room,for this we can use the backend service which we can say basically,....
 **channel layers**(is a functionality or a system that is typically implemented using custom or built in backend services like **redis** which is for inter-consumer communications or broad-coasting the messages to a group of consumers.This is what we can say a channel layer).
+  - **Redis** is official Django-maintained channel layer supported for production use. The layer uses Redis as its backing store, and it supports both a single-server and sharded configurations as well as group support.
+  - **In-Memory Channel Layer**
+      Channels also comes packaged with an in-memory Channels Layer. This layer can be helpful in Testing or for local-development purposes.
+     - ***Do Not Use In Production***
+      In-memory channel layers operate with each process as a separate layer. This means that no cross-process messaging is possible. As the core value of channel layers is to provide distributed messaging, in-memory usage will result in sub-optimal performance, and ultimately data-loss in a multi-instance environment.
 
 
 - **Consumer** A Python function or class that handles **WebSocket or HTTP requests** and returns responses. Similar to Django views but designed for **asynchronous protocols**.Handles WebSocket events like **connecting**, **disconnecting**, and **receiving/sending messages**.
