@@ -975,7 +975,7 @@ Whenever the request comes in it is handled by the Request middlewares. We can h
 
 - **ASGI Server (like Daphne/Uvicorn):** You still need one of these to run Django Channels. These servers are responsible for handling the duplix communications e.g.incoming WebSocket connections along side http requests and delivering them to Django's async-capable consumers.***As django is by default WSGI*** so to make it ASGI we ***need channels*** so that it could aslo handle the duplix communications.as channels use the websockets behind so we can say it,A ***channel*** is also a pathway to send or receive the messages.
   
-**Django Channels:** Mean It extends Django by adding the ability to handle WebSockets, HTTP2, and other asynchronous protocols, along with background tasks, message queues, etc.
+**Django Channels:** Mean It extends Django by adding the ability to handle WebSockets, HTTP2, and other asynchronous protocols, along with background tasks, message queues, etc.**server side** we mostly say a channel which handle the front end websocket connections or reqeusts which basically using the asgi server behind the scene.
 
 - ***Channels*** doesn't remove the need for an ASGI server, but it simplifies the integration of asynchronous protocols into Django without requiring additional tools like Celery for background tasks.
 
@@ -983,7 +983,7 @@ Whenever the request comes in it is handled by the Request middlewares. We can h
 
 - **channels layers** are used to send the or receive the messages  across consumers or machines,....
 - **grouping** is basically to send or receive messages to multiple or group of consumers e.g chat room,for this we can use the backend service which we can say basically,....
-**channel layers**(is a functionality or a system that is typically implemented using custom or built in backend services like **redis** which is for inter-consumer communications or broad-coasting the messages to a group of consumers.This is what we can say a channel layer).
+**channel layers**(is a functionality or a system that is typically implemented using custom or built in backend services like **redis** and websocket  which is for inter-consumer communications or broad-coasting the messages to a group of consumers.This is what we can say a channel layer).Each instance/user is a channel layer which is using the channel(server) and webscoket(front end) individually,mean he is connecting with the server and client individually but not with others,To connect this instance to other instances we have to establish a server which is we are using a **Redis** here which will handle the instances .Channel layers also provie the suport of grouping/chat-room and channels,mean instances can be added or discarded to the room,so all the channels/users whcih are in the room ,whenever a user/channel send the message these all channels will receive that.We mostly use the asynchronous methods to stimulates the non-blocking functionalities.
   - **Redis** is official Django-maintained channel layer supported for production use. The layer uses Redis as its backing store, and it supports both a single-server and sharded configurations as well as group support.
   - **In-Memory Channel Layer**
       Channels also comes packaged with an in-memory Channels Layer. This layer can be helpful in Testing or for local-development purposes.
@@ -1048,7 +1048,10 @@ A system that allows **message passing between consumers**. Typically implemente
 ### Purpose
 - Facilitates **inter-consumer communication**.
 - Enables tasks like **broadcasting messages** to groups of consumers.
-
+- We mostly access this layer in our code to add in the group the channels
+- 
+  ```self.channels_layer.add_group
+  ```
 ---
 
 ## 5. Consumers
