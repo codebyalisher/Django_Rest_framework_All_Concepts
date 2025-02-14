@@ -967,8 +967,28 @@ Whenever the request comes in it is handled by the Request middlewares. We can h
 ***These are the functions that have the access to the request and response object and next middleware function in application request-response cycle.It performs changes to request and response objects.End reqeust response cycle.call the next middleware function.***
 
 ---
-# Overview of Concepts
+# Overview of Concepts(Django Channels)
 #### for furthere concepts ,you can read this article https://medium.com/@mrabet_zakariae/django-channels-cb0b82e37c94
+### ASGI vs WSGI
+- **WSGI** is synchronous and cannot handle WebSockets or long-lived connections.
+- **ASGI** is asynchronous and supports WebSockets, HTTP/2, and more.
+
+- **ASGI Server (like Daphne/Uvicorn):** You still need one of these to run Django Channels. These servers are responsible for handling the duplix communications e.g.incoming WebSocket connections along side http requests and delivering them to Django's async-capable consumers.***As django is by default WSGI*** so to make it ASGI we ***need channels*** so that it could aslo handle the duplix communications.as channels use the websockets behind so we can say it,A ***channel*** is also a pathway to send or receive the messages.
+  
+**Django Channels:** Mean It extends Django by adding the ability to handle WebSockets, HTTP2, and other asynchronous protocols, along with background tasks, message queues, etc.
+
+- ***Channels*** doesn't remove the need for an ASGI server, but it simplifies the integration of asynchronous protocols into Django without requiring additional tools like Celery for background tasks.
+
+- **Background Tasks:** With Channels, you can manage long-lived connections (such as WebSockets) and handle background tasks without needing Celery for certain use cases. However, Celery is still a great tool for complex, distributed task handling and is used in many Django applications. ***Channels does not replace Celery—just*** simplifies handling tasks related to asynchronous communication like WebSockets.
+
+- **channels layers** are used to send the or receive the messages  across consumers or machines,....
+- **grouping** is basically to send or receive messages to multiple or group of consumers e.g chat room,for this we can use the backend service which we can say basically,....
+**channel layers**(is a functionality or a system that is typically implemented using custom or built in backend services like **redis** which is for inter-consumer communications or broad-coasting the messages to a group of consumers.This is what we can say a channel layer).
+
+
+- **Consumer** A Python function or class that handles **WebSocket or HTTP requests** and returns responses. Similar to Django views but designed for **asynchronous protocols**.Handles WebSocket events like **connecting**, **disconnecting**, and **receiving/sending messages**.
+
+- **Routing** Determines which **consumer** should handle a request. Similar to URL routing in Django but for **WebSockets or other asynchronous protocols**.Maps incoming ***WebSocket connections or events to the appropriate consumer***.**WebSockets** provide a **full-duplex communication channel** over a single TCP connection. Enables **low-latency, real-time communication** between the client and server.
 
 ## 1. ASGI (Asynchronous Server Gateway Interface)
 
