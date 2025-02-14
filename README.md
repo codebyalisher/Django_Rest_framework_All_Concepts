@@ -968,6 +968,7 @@ Whenever the request comes in it is handled by the Request middlewares. We can h
 
 ---
 # Overview of Concepts
+#### for furthere concepts ,you can read this article https://medium.com/@mrabet_zakariae/django-channels-cb0b82e37c94
 
 ## 1. ASGI (Asynchronous Server Gateway Interface)
 
