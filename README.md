@@ -1049,8 +1049,9 @@ A system that allows **message passing between consumers**. Typically implemente
 - Facilitates **inter-consumer communication**.
 - Enables tasks like **broadcasting messages** to groups of consumers.
 - We mostly access this layer in our code to add in the group the channels
-- 
-  ```self.channels_layer.add_group
+  
+  ```python
+  self.channels_layer.add_group
   ```
 ---
 
