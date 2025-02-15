@@ -968,7 +968,7 @@ Whenever the request comes in it is handled by the Request middlewares. We can h
 
 ---
 # Overview of Concepts(Django Channels)
-#### for furthere concepts ,you can read this article https://medium.com/@mrabet_zakariae/django-channels-cb0b82e37c94
+#### for furthere concepts ,you can read these article https://coffeebytes.dev/en/django-channels-consumers-environments-and-events/,https://medium.com/@mrabet_zakariae/django-channels-cb0b82e37c94
 ### ASGI vs WSGI
 - **WSGI** is synchronous and cannot handle WebSockets or long-lived connections.
 - **ASGI** is asynchronous and supports WebSockets, HTTP/2, and more.
