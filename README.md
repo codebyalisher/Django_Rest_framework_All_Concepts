@@ -1255,6 +1255,7 @@ This document outlines how Django components—models, managers, serializers, vi
    - Define the database schema and structure.
    - Interact with managers for object manipulation.
    - Passed as arguments to utility functions.
+   - https://docs.djangoproject.com/en/5.1/ref/models/fields/#onetoonefield
 
 5. **Utility Functions**:
    - Contain reusable logic like sending emails or performing calculations.
