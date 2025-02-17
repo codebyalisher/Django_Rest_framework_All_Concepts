@@ -985,6 +985,9 @@ Whenever the request comes in it is handled by the Request middlewares. We can h
 - **grouping** is basically to send or receive messages to multiple or group of consumers e.g chat room,for this we can use the backend service which we can say basically,....
 **channel layers**(is a functionality or a system that is typically implemented using custom or built in backend services like **redis** and websocket  which is for inter-consumer communications or broad-coasting the messages to a group of consumers.This is what we can say a channel layer).Each instance/user is a channel layer which is using the channel(server) and webscoket(front end) individually,mean he is connecting with the server and client individually but not with others,To connect this instance to other instances we have to establish a server which is we are using a **Redis** here which will handle the instances .Channel layers also provie the suport of grouping/chat-room and channels,mean instances can be added or discarded to the room,so all the channels/users whcih are in the room ,whenever a user/channel send the message these all channels will receive that.We mostly use the asynchronous methods to stimulates the non-blocking functionalities.
   - **Redis** is official Django-maintained channel layer supported for production use. The layer uses Redis as its backing store, and it supports both a single-server and sharded configurations as well as group support.
+```python
+docker run -d -p 6379:6379 --name redis redis, command for redis using docker,we can also insall directly from docker images to use redis
+```
   - **In-Memory Channel Layer**
       Channels also comes packaged with an in-memory Channels Layer. This layer can be helpful in Testing or for local-development purposes.
      - ***Do Not Use In Production***
