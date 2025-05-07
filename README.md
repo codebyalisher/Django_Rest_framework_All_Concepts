@@ -37,6 +37,7 @@ Whenever implementing a project, follow the dynamic approach outlined below. Thi
 ## Class-based view (CBV), which means it's built on top of Django’s generic view system — using inheritance and mixins to provide modular, reusable behavior.
 [Link](https://ccbv.co.uk/projects/Django/5.2/)
 🧬 **Inheritance Hierarchy of LoginView**
+```md
 +--------------------+
 |   User Requests    |
 |     /login/        |
@@ -90,10 +91,12 @@ Whenever implementing a project, follow the dynamic approach outlined below. Thi
 |  End of Request-   |
 |  Response Cycle    |
 +--------------------+
+```
 ![image](https://github.com/user-attachments/assets/98e447ef-1d65-4bf0-a048-7b36099970b6)
 ![image](https://github.com/user-attachments/assets/c7394fdf-3f48-4196-a863-9fa4a75fb88f)
 ![image](https://github.com/user-attachments/assets/ed45f8b4-7169-4ff6-ba24-2bb1beb94c38)
 ![image](https://github.com/user-attachments/assets/32be3ccb-6143-4f2e-81c9-4cc5e74a2996)
+
 ```python
 LoginView
  └── FormView
@@ -115,9 +118,7 @@ AccessMixin: Provides login_url, permission_denied_message, etc.
 TemplateResponseMixin: Adds support for rendering templates.
 
 ContextMixin: For adding extra context to templates.
-
-
-
+```
 
 ## 10. Serializer
 - Handle **validation**, **data transformation**, and linking to model methods for actions like `create`, `update`, etc.
