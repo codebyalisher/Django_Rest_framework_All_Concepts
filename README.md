@@ -36,6 +36,8 @@ Whenever implementing a project, follow the dynamic approach outlined below. Thi
     - Decide if validation logic will be inside the view or in the serializer (or both).
 ## Class-based view (CBV), which means it's built on top of Django’s generic view system — using inheritance and mixins to provide modular, reusable behavior.
 [Link](https://ccbv.co.uk/projects/Django/5.2/)
+![image](https://github.com/user-attachments/assets/b9f453d3-1726-481d-935e-e60a7fa10ab7)
+
 🧬 **Inheritance Hierarchy of LoginView**
 ```md
 +--------------------+
